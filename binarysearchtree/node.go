@@ -166,6 +166,7 @@ func search(n *Node, key int) bool {
 	return true
 }
 
+// Remove removes an Item from the tree based on a key
 func (bst *ItemBinarySearchTree) Remove(key int) *Node {
 	bst.lock.RLock()
 	defer bst.lock.RUnlock()

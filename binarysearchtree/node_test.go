@@ -1,6 +1,7 @@
 package binarytree
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -22,4 +23,43 @@ func TestInsert(t *testing.T) {
 
 	bst.Insert(11, "11")
 	bst.String()
+}
+
+func isSameSlice(a, b []string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func TestInOrderTraverse(t *testing.T) {
+	var result []string
+	bst.InOrderTraverse(func(i Item) {
+		result = append(result, fmt.Sprintf("%s", i))
+	})
+
+	if !isSameSlice(result, []string{"1", "2", "3", "4", "6", "8", "10", "11"}) {
+		t.Errorf("Traversal order incorrect, got %v", result)
+	}
+}
+
+func TestMin(t *testing.T) {
+	if fmt.Sprintf("%s", *bst.Min()) != "1" {
+		t.Errorf("MIN should be 1")
+	}
 }
