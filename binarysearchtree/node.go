@@ -1,6 +1,7 @@
 package binarytree
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/cheekybits/genny/generic"
@@ -104,7 +105,7 @@ func postOrderTraverse(n *Node, f func(Item)) {
 }
 
 // Min returns the Item with the smallest value stored in the tree
-func (bst ItemBinarySearchTree) Min() *Item {
+func (bst *ItemBinarySearchTree) Min() *Item {
 	bst.lock.RLock()
 	defer bst.lock.RUnlock()
 
@@ -118,5 +119,126 @@ func (bst ItemBinarySearchTree) Min() *Item {
 			return &n.value
 		}
 		n = n.left
+	}
+}
+
+// Max returns the Item with the biggest value stored in the tree
+func (bst *ItemBinarySearchTree) Max() *Item {
+	bst.lock.RLock()
+	defer bst.lock.RUnlock()
+
+	n := bst.root
+	if n == nil {
+		return nil
+	}
+
+	for {
+		if n.right == nil {
+			return &n.value
+		}
+
+		n = n.right
+	}
+}
+
+// Search returns true if an item exists in the tree
+func (bst *ItemBinarySearchTree) Search(key int) bool {
+	bst.lock.RLock()
+	defer bst.lock.RUnlock()
+	return search(bst.root, key)
+}
+
+// internal recursive search function
+func search(n *Node, key int) bool {
+
+	if n == nil {
+		return false
+	}
+
+	if key < n.key {
+		return search(n.left, key)
+	}
+
+	if key > n.key {
+		return search(n.right, key)
+	}
+
+	return true
+}
+
+func (bst *ItemBinarySearchTree) Remove(key int) *Node {
+	bst.lock.RLock()
+	defer bst.lock.RUnlock()
+	return remove(bst.root, key)
+}
+
+func remove(n *Node, key int) *Node {
+
+	if n == nil {
+		return nil
+	}
+
+	if key < n.key {
+		n.left = remove(n.left, key)
+		return n
+	}
+
+	if key > n.key {
+		n.right = remove(n.right, key)
+		return n
+	}
+	// key == n.key
+	if n.left == nil && n.right == nil {
+		n = nil
+		return nil
+	}
+
+	if n.left == nil {
+		n = n.right
+		return n
+	}
+
+	if n.right == nil {
+		n = n.left
+		return n
+	}
+
+	leftmostrightside := n.right
+	for {
+		// find smallest value on the right side
+		if leftmostrightside != nil && leftmostrightside.left != nil {
+			leftmostrightside = leftmostrightside.left
+		} else {
+			break
+		}
+	}
+	n.key, n.value = leftmostrightside.key, leftmostrightside.value
+	n.right = remove(n.right, n.key)
+
+	return n
+}
+
+//String prints a visual representation of the tree
+func (bst *ItemBinarySearchTree) String() {
+	bst.lock.Lock()
+	defer bst.lock.Unlock()
+	fmt.Println("---------------------------------")
+	stringify(bst.root, 0)
+	fmt.Println("---------------------------------")
+
+}
+
+func stringify(n *Node, level int) {
+
+	if n != nil {
+		format := ""
+		for i := 0; i < level; i++ {
+			format += "    "
+		}
+		format += "---[ "
+		level++
+		stringify(n.left, level)
+		fmt.Printf(format+"%d\n", n.key)
+		stringify(n.right, level)
 	}
 }
