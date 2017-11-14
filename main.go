@@ -71,7 +71,10 @@ func printMap(g [][]Cell) {
 		for col := 0; col < DIMENSION; col++ {
 			cell := g[row][col]
 
-			if cell.east != nil {
+			eastCell := *cell.east
+			southCell := *cell.south
+
+			if eastCell.west.coord.y == cell.coord.y {
 				top.WriteString(body)
 				top.WriteString(" ")
 			} else {
@@ -79,7 +82,7 @@ func printMap(g [][]Cell) {
 				top.WriteString("|")
 			}
 
-			if cell.south != nil {
+			if southCell.north.coord.x == cell.coord.x {
 				bottom.WriteString(body)
 				bottom.WriteString(corner)
 			} else {
