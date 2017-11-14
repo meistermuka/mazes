@@ -1,6 +1,4 @@
 import random
-from pprint import pprint as pp
-
 
 DIMENSION = 10
 
@@ -70,16 +68,17 @@ def binary_tree(cells):
                 neighbours.append(cells[row][col+1])
 
             # Check if south is a valid cell
-            #print(len(neighbours))
+
             index = random.randrange(0, len(neighbours))
             the_cell_x = neighbours[index].x
             the_cell_y = neighbours[index].y
             # If the cell to the west is valid
-            if cells[the_cell_x][the_cell_y-1]:
+            if the_cell_y-1 > -1:
                 cells[the_cell_x][the_cell_y].east = cells[the_cell_x][the_cell_y-1]
                 cells[the_cell_x][the_cell_y-1].west = cells[the_cell_x][the_cell_y]
 
-            if cells[the_cell_x+1][the_cell_y]:
+            # IF the cell to the south is valid
+            if the_cell_x+1 < DIMENSION:
                 cells[the_cell_x][the_cell_y].south = cells[the_cell_x+1][the_cell_y]
                 cells[the_cell_x+1][the_cell_y].north = cells[the_cell_x][the_cell_y]
 

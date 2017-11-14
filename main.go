@@ -24,31 +24,32 @@ type Cell struct {
 }
 
 // DIMENSION bla bla
-const DIMENSION = 10
+const DIMENSION = 20
 
 func main() {
-	//grid := [DIMENSION][DIMENSION]Cell{}
+
+	// Creating 2D grid of Cell
 	grid := make([][]Cell, DIMENSION)
 	for i := range grid {
 		grid[i] = make([]Cell, DIMENSION)
 	}
-	//fmt.Println(grid)
-	for i := 0; i < DIMENSION; i++ {
-		for j := 0; j < DIMENSION; j++ {
-			grid[i][j].coord.x = i
-			grid[i][j].coord.y = j
+
+	// Setting the individual coordinates of each Cell
+	for row := 0; row < DIMENSION; row++ {
+		for col := 0; col < DIMENSION; col++ {
+			grid[row][col].coord.x = row
+			grid[row][col].coord.y = col
 		}
 	}
-	//fmt.Println(grid)
+
 	fmt.Println("Initializing grid...")
-	//initGrid(grid)
-	//printGrid(grid)
-	//printMap(grid)
+	// Using Binary Tree style of maze init
 	binaryTree(grid)
 	printMap(grid)
 
 }
 
+// printMap basically prints the map on screen
 func printMap(g [][]Cell) {
 	var top, bottom, output bytes.Buffer
 	topBorder := "---+"
@@ -63,11 +64,11 @@ func printMap(g [][]Cell) {
 
 	output.WriteString("\n")
 
-	for i := 0; i < DIMENSION; i++ {
+	for row := 0; row < DIMENSION; row++ {
 		top.WriteString("|")
 		bottom.WriteString("+")
-		for j := 0; j < DIMENSION; j++ {
-			cell := g[i][j]
+		for col := 0; col < DIMENSION; col++ {
+			cell := g[row][col]
 
 			if cell.east != nil {
 				top.WriteString(body)
@@ -97,46 +98,7 @@ func printMap(g [][]Cell) {
 	fmt.Println(output.String())
 }
 
-func printGrid(g [][]Cell) {
-	fmt.Println("Printing Grid Info...")
-	for i := 0; i < DIMENSION; i++ {
-		for j := 0; j < DIMENSION; j++ {
-
-			fmt.Println("Coords:", g[i][j].coord)
-
-			north := g[i][j].north
-			east := g[i][j].east
-			south := g[i][j].south
-			west := g[i][j].west
-
-			if north != nil {
-				fmt.Println("North", north.coord)
-			} else {
-				fmt.Println(nil)
-			}
-
-			if east != nil {
-				fmt.Println("East", east.coord)
-			} else {
-				fmt.Println(nil)
-			}
-
-			if south != nil {
-				fmt.Println("South", south.coord)
-			} else {
-				fmt.Println(nil)
-			}
-
-			if west != nil {
-				fmt.Println("West", west.coord)
-			} else {
-				fmt.Println(nil)
-			}
-
-			fmt.Println()
-		}
-	}
-}
+// Basic grid init connecting all the cells together
 func initGrid(g [][]Cell) {
 	for row := 0; row < DIMENSION; row++ {
 		for col := 0; col < DIMENSION; col++ {
@@ -169,44 +131,37 @@ func initGrid(g [][]Cell) {
 	}
 }
 
+// binary tree style of grid generation using random numbers based on neighbours
 func binaryTree(g [][]Cell) {
 
 	var neighbours []Cell
 	for row := 0; row < DIMENSION; row++ {
 		for col := 0; col < DIMENSION; col++ {
-
-			//cell := g[row][col]
-
 			if row > 0 {
-				//g[row][col].north = &g[row-1][col]
 				neighbours = append(neighbours, g[row-1][col])
 			}
 
 			if col < DIMENSION-1 {
-				//g[row][col].east = &g[row][col+1]
 				neighbours = append(neighbours, g[row][col+1])
 			}
 
 			index := generateRandomNumber(len(neighbours))
 			neighbour := neighbours[index]
 
-			//fmt.Printf("[%d,%d]", neighbour.coord.x, neighbour.coord.y)
-			//fmt.Println()
-			if *neighbour.south == cell {
-				fmt.Println("Connect North")
+			nx := neighbour.coord.x
+			ny := neighbour.coord.y
+
+			if nx+1 < DIMENSION {
+				g[nx][ny].south = &g[nx+1][ny]
+				g[nx+1][ny].north = &g[nx][ny]
 			}
 
-			if *neighbour.west == cell {
-				fmt.Println("Connect West")
+			if ny-1 > -1 {
+				g[nx][ny].west = &g[nx][ny-1]
+				g[nx][ny-1].east = &g[nx][ny]
 			}
-			//fmt.Println(neighbour)
-
 		}
 	}
-	/*for i, _ := range neighbours {
-		fmt.Printf("[%d,%d]", neighbours[i].coord.x, neighbours[i].coord.y)
-		fmt.Println()
-	}*/
 }
 
 func generateRandomNumber(amount int) int {
