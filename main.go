@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 // CellCoord bla bla bla
@@ -37,10 +39,12 @@ func main() {
 			grid[i][j].coord.y = j
 		}
 	}
-	fmt.Println(grid)
+	//fmt.Println(grid)
 	fmt.Println("Initializing grid...")
-	initGrid(grid)
+	//initGrid(grid)
 	//printGrid(grid)
+	//printMap(grid)
+	binaryTree(grid)
 	printMap(grid)
 
 }
@@ -51,15 +55,17 @@ func printMap(g [][]Cell) {
 	body := "   "
 	corner := "+"
 	output.WriteString("+")
-	top.WriteString("|")
-	bottom.WriteString("+")
 
 	// Draw the top part
 	for k := 0; k < DIMENSION; k++ {
 		output.WriteString(topBorder)
 	}
 
+	output.WriteString("\n")
+
 	for i := 0; i < DIMENSION; i++ {
+		top.WriteString("|")
+		bottom.WriteString("+")
 		for j := 0; j < DIMENSION; j++ {
 			cell := g[i][j]
 
@@ -83,6 +89,9 @@ func printMap(g [][]Cell) {
 
 		output.WriteString(top.String() + "\n")
 		output.WriteString(bottom.String() + "\n")
+
+		top.Reset()
+		bottom.Reset()
 	}
 
 	fmt.Println(output.String())
@@ -129,33 +138,82 @@ func printGrid(g [][]Cell) {
 	}
 }
 func initGrid(g [][]Cell) {
-	for i := 0; i < DIMENSION; i++ {
-		for j := 0; j < DIMENSION; j++ {
+	for row := 0; row < DIMENSION; row++ {
+		for col := 0; col < DIMENSION; col++ {
 
-			if j > 0 {
-				g[i][j].north = &g[i][j-1]
+			if row > 0 {
+				g[row][col].north = &g[row-1][col]
 			} else {
-				g[i][j].north = nil
+				g[row][col].north = nil
 			}
 
-			if j < DIMENSION-1 {
-				g[i][j].south = &g[i][j+1]
+			if row < DIMENSION-1 {
+				g[row][col].south = &g[row+1][col]
 			} else {
-				g[i][j].south = nil
+				g[row][col].south = nil
 			}
 
-			if i < DIMENSION-1 {
-				g[i][j].east = &g[i+1][j]
+			if col < DIMENSION-1 {
+				g[row][col].east = &g[row][col+1]
 			} else {
-				g[i][j].east = nil
+				g[row][col].east = nil
 			}
 
-			if i > 0 {
-				g[i][j].west = &g[i-1][j]
+			if col > 0 {
+				g[row][col].west = &g[row][col-1]
 			} else {
-				g[i][j].west = nil
+				g[row][col].west = nil
 			}
 
 		}
 	}
+}
+
+func binaryTree(g [][]Cell) {
+
+	var neighbours []Cell
+	for row := 0; row < DIMENSION; row++ {
+		for col := 0; col < DIMENSION; col++ {
+
+			//cell := g[row][col]
+
+			if row > 0 {
+				//g[row][col].north = &g[row-1][col]
+				neighbours = append(neighbours, g[row-1][col])
+			}
+
+			if col < DIMENSION-1 {
+				//g[row][col].east = &g[row][col+1]
+				neighbours = append(neighbours, g[row][col+1])
+			}
+
+			index := generateRandomNumber(len(neighbours))
+			neighbour := neighbours[index]
+
+			//fmt.Printf("[%d,%d]", neighbour.coord.x, neighbour.coord.y)
+			//fmt.Println()
+			if *neighbour.south == cell {
+				fmt.Println("Connect North")
+			}
+
+			if *neighbour.west == cell {
+				fmt.Println("Connect West")
+			}
+			//fmt.Println(neighbour)
+
+		}
+	}
+	/*for i, _ := range neighbours {
+		fmt.Printf("[%d,%d]", neighbours[i].coord.x, neighbours[i].coord.y)
+		fmt.Println()
+	}*/
+}
+
+func generateRandomNumber(amount int) int {
+
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	return r.Intn(amount)
+
 }
