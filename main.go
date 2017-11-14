@@ -44,7 +44,8 @@ func main() {
 
 	fmt.Println("Initializing grid...")
 	// Using Binary Tree style of maze init
-	binaryTree(grid)
+	//binaryTree(grid)
+	sideWinder(grid)
 	printMap(grid)
 
 }
@@ -159,6 +160,40 @@ func binaryTree(g [][]Cell) {
 			if ny-1 > -1 {
 				g[nx][ny].west = &g[nx][ny-1]
 				g[nx][ny-1].east = &g[nx][ny]
+			}
+		}
+	}
+}
+
+func sideWinder(g [][]Cell) {
+
+	for row := 0; row < DIMENSION; row++ {
+		var sideRun []Cell
+		for col := 0; col < DIMENSION; col++ {
+			sideRun = append(sideRun, g[row][col])
+
+			atEastBound := bool(col == DIMENSION-1)
+			atNorthBound := bool(row == 0)
+			shouldCloseOut := bool(atEastBound || (!atNorthBound && generateRandomNumber(2) == 0))
+
+			index := generateRandomNumber(len(sideRun))
+			sample := sideRun[index]
+			sampleX := sample.coord.x
+			sampleY := sample.coord.y
+
+			if shouldCloseOut {
+				if sampleY > 0 {
+					// link north/south
+					g[sampleX][sampleY].north = &g[sampleX][sampleY-1]
+					g[sampleX][sampleY-1].south = &g[sampleX][sampleY]
+					sideRun = nil
+				}
+			} else {
+				// link east/west
+				if sampleX < DIMENSION-1 {
+					g[sampleX][sampleY].east = &g[sampleX+1][sampleY]
+					g[sampleX+1][sampleY].west = &g[sampleX][sampleY]
+				}
 			}
 		}
 	}
