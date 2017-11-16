@@ -1,6 +1,6 @@
 import random
 
-DIMENSION = 10
+DIMENSION = 7
 
 class Cell(object):
 
@@ -31,14 +31,15 @@ def printMap(cells):
         for col in range(DIMENSION):
             cell = cells[row][col]
 
-            if cell.east != None:
+            #if cell.east != None:
+            if cell.east != None and col < DIMENSION-1:
                 top += body
                 top += " "
             else:
                 top += body
                 top += "|"
 
-            if cell.south != None:
+            if cell.south != None and row < DIMENSION-1:
                 bottom += body
                 bottom += corner
             else:
@@ -53,6 +54,34 @@ def printMap(cells):
 
     print(output)
 
+
+def sidewinder(cells):
+
+    for row in range(DIMENSION):
+        side_run = []
+        for col in range(DIMENSION):
+            side_run.append(cells[row][col])
+
+            at_east_bound = bool(col == DIMENSION-1)
+            at_north_bound = bool(row == 0)
+            should_closeout = bool(at_east_bound or (not at_north_bound and random.randrange(0, 2) == 0))
+
+            index = random.randrange(0, len(side_run))
+            sample = side_run[index]
+            sample_x = sample.x
+            sample_y = sample.y
+
+            if should_closeout:
+                if sample_y > 0:
+                    # Link north/south
+                    cells[row][col].north = cells[row][col-1]
+                    cells[row][col-1].south = cells[row][col]
+                    side_run = []
+            else:
+                # Link east/west
+                if sample_x < DIMENSION-1:
+                    cells[row][col].east = cells[row+1][col]
+                    cells[row+1][col].west = cells[row][col]
 
 def binary_tree(cells):
 
@@ -94,5 +123,6 @@ if __name__ == "__main__":
 
         cells.append(row_list)
 
-    binary_tree(cells)
+    #binary_tree(cells)
+    sidewinder(cells)
     printMap(cells)
