@@ -1,6 +1,6 @@
 import random
 
-DIMENSION = 7
+DIMENSION = 4
 
 class Cell(object):
 
@@ -71,7 +71,7 @@ def sidewinder(cells):
             sample_y = sample.y
 
             if should_closeout:
-                if sample_y > 0:
+                if sample_y > 0 and cells[row][col-1]:
                     # Link north/south
                     cells[row][col].north = cells[row][col-1]
                     cells[row][col-1].south = cells[row][col]
