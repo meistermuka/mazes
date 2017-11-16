@@ -31,7 +31,6 @@ def printMap(cells):
         for col in range(DIMENSION):
             cell = cells[row][col]
 
-            #if cell.east != None:
             if cell.east != None and col < DIMENSION-1:
                 top += body
                 top += " "
