@@ -1,6 +1,5 @@
 import random
 
-DIMENSION = 4
 
 class Cell(object):
 
@@ -13,115 +12,145 @@ class Cell(object):
         self.east = None
         self.west = None
 
+    def link(self, direction, linked_cell, bidi=True):
+        if direction == "north" and bidi:
+            self.north = linked_cell
+            linked_cell.south = self
 
-def printMap(cells):
-    output = "+"
-    body = "   "
-    corner = "+"
+        if direction == "south" and bidi:
+            self.south = linked_cell
+            linked_cell.north = self
 
-    # Draw the top part
-    for x in range(DIMENSION):
-        output += "---+"
+        if direction == "east" and bidi:
+            self.east = linked_cell
+            linked_cell.west = self
 
-    output += "\n"
-
-    for row in range(DIMENSION):
-        top = "|"
-        bottom = "+"
-        for col in range(DIMENSION):
-            cell = cells[row][col]
-
-            if cell.east != None and col < DIMENSION-1:
-                top += body
-                top += " "
-            else:
-                top += body
-                top += "|"
-
-            if cell.south != None and row < DIMENSION-1:
-                bottom += body
-                bottom += corner
-            else:
-                bottom += "---"
-                bottom += corner
-
-        output += top + "\n"
-        output += bottom + "\n"
-
-        top = ""
-        bottom = ""
-
-    print(output)
+        if direction == "west" and bidi:
+            self.west = linked_cell
+            linked_cell.east = self
 
 
-def sidewinder(cells):
+class Grid(object):
 
-    for row in range(DIMENSION):
-        side_run = []
-        for col in range(DIMENSION):
-            side_run.append(cells[row][col])
+    def __init__(self, x_size, y_size):
+        self.x_size = x_size
+        self.y_size = y_size
+        self.maze_type = ""
+        self.cells = []
+        self.reset_grid()
 
-            at_east_bound = bool(col == DIMENSION-1)
-            at_north_bound = bool(row == 0)
-            should_closeout = bool(at_east_bound or (not at_north_bound and random.randrange(0, 2) == 0))
+    def reset_grid(self):
+        self.cells = []
+        self.maze_type = ""
 
-            index = random.randrange(0, len(side_run))
-            sample = side_run[index]
-            sample_x = sample.x
-            sample_y = sample.y
+        # Initializing basic grid
+        for row in range(self.y_size):
+            row_list = []
+            for col in range(self.x_size):
+                row_list.append(Cell(x_coord=row, y_coord=col))
 
-            if should_closeout:
-                if sample_y > 0 and cells[row][col-1]:
-                    # Link north/south
-                    cells[row][col].north = cells[row][col-1]
-                    cells[row][col-1].south = cells[row][col]
-                    side_run = []
-            else:
-                # Link east/west
-                if sample_x < DIMENSION-1:
-                    cells[row][col].east = cells[row+1][col]
-                    cells[row+1][col].west = cells[row][col]
+            self.cells.append(row_list)
 
-def binary_tree(cells):
+    def print_grid(self):
+        output = "+"
+        body = "   "
+        corner = "+"
 
-    neighbours = []
+        # Draw the top part
+        for x in range(self.x_size):
+            output += "---+"
 
-    for row in range(DIMENSION):
-        for col in range(DIMENSION):
+        output += "\n"
 
-            if row > 0:
-                neighbours.append(cells[row-1][col])
+        for row in range(self.y_size):
+            top = "|"
+            bottom = "+"
+            for col in range(self.x_size):
+                cell = self.cells[row][col]
 
-            if col < DIMENSION-1:
-                neighbours.append(cells[row][col+1])
+                if cell.east is not None and col < self.x_size - 1:
+                    top += body
+                    top += " "
+                else:
+                    top += body
+                    top += "|"
 
-            # Check if south is a valid cell
+                if cell.south is not None and row < self.y_size - 1:
+                    bottom += body
+                    bottom += corner
+                else:
+                    bottom += "---"
+                    bottom += corner
 
-            index = random.randrange(0, len(neighbours))
-            the_cell_x = neighbours[index].x
-            the_cell_y = neighbours[index].y
-            # If the cell to the west is valid
-            if the_cell_y-1 > -1:
-                cells[the_cell_x][the_cell_y].east = cells[the_cell_x][the_cell_y-1]
-                cells[the_cell_x][the_cell_y-1].west = cells[the_cell_x][the_cell_y]
+            output += top + "\n"
+            output += bottom + "\n"
 
-            # IF the cell to the south is valid
-            if the_cell_x+1 < DIMENSION:
-                cells[the_cell_x][the_cell_y].south = cells[the_cell_x+1][the_cell_y]
-                cells[the_cell_x+1][the_cell_y].north = cells[the_cell_x][the_cell_y]
+        print(self.maze_type)
+        print(output)
+
+    def sidewinder(self):
+        for row in range(self.y_size):
+            side_run = []
+            for col in range(self.x_size):
+                side_run.append(self.cells[row][col])
+
+                at_east_bound = bool(col == self.x_size - 1)
+                at_north_bound = bool(row == 0)
+                should_closeout = bool(at_east_bound or (not at_north_bound and random.randrange(0, 2) == 0))
+
+                index = random.randrange(0, len(side_run))
+                sample = side_run[index]
+                sample_x = sample.x
+                sample_y = sample.y
+
+                if should_closeout:
+                    if sample_y > 0 and self.cells[row][col - 1]:
+                        # Link north/south
+                        self.cells[row][col].link("north", self.cells[row][col - 1])
+                        side_run = []
+                else:
+                    # Link east/west
+                    if sample_x < self.y_size - 1:
+                        self.cells[row][col].link("east", self.cells[row +1][col])
+
+        self.maze_type = "Sidewinder"
+
+    def binary_tree(self):
+        neighbours = []
+
+        for row in range(self.y_size):
+            for col in range(self.x_size):
+
+                if row > 0:
+                    neighbours.append(self.cells[row - 1][col])
+
+                if col < self.x_size - 1:
+                    neighbours.append(self.cells[row][col + 1])
+
+                # Check if south is a valid cell
+
+                index = random.randrange(0, len(neighbours))
+                the_cell_x = neighbours[index].x
+                the_cell_y = neighbours[index].y
+
+                # If the cell to the west is valid
+                if the_cell_y - 1 > -1:
+                    self.cells[the_cell_x][the_cell_y].link("east", self.cells[the_cell_x][the_cell_y - 1])
+
+                # IF the cell to the south is valid
+                if the_cell_x + 1 < self.y_size:
+                    self.cells[the_cell_x][the_cell_y].link("south", self.cells[the_cell_x + 1][the_cell_y])
+
+        self.maze_type = "Binary Tree"
 
 
 if __name__ == "__main__":
 
-    cells = []
-    # Initializing basic grid
-    for row in range(DIMENSION):
-        row_list = []
-        for col in range(DIMENSION):
-            row_list.append(Cell(x_coord=row, y_coord=col))
-
-        cells.append(row_list)
-
-    #binary_tree(cells)
-    sidewinder(cells)
-    printMap(cells)
+    maze = Grid(7, 5)
+    maze.print_grid()
+    maze.sidewinder()
+    maze.print_grid()
+    maze.reset_grid()
+    maze.print_grid()
+    maze.binary_tree()
+    maze.print_grid()
